@@ -2,446 +2,522 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>NEXUS STREAM · HYBRID PLAYER</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ENC-DEC PRO · Multi-Site Stream Hub</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.7/dist/hls.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#05070a; --surface:#0c0f14; --card:#11161d; --border:#1e2a36;
+  --bg:#0a0c12; --surface:#12151e; --card:#191e2a; --border:#2a2f3f;
   --cyan:#00e5ff; --cyan-glow:rgba(0,229,255,0.12); --green:#1afa8c;
-  --red:#ff4f4f; --yellow:#fbbf24; --purple:#a78bfa; --text:#eef2ff;
-  --muted:#6b7c93; --mono:'Inter', monospace; --display:'Syne',sans-serif;
-  --radius:18px; --radius-sm:10px; --transition:0.2s cubic-bezier(0.2,0.9,0.4,1.1);
+  --red:#ff4f4f; --yellow:#fbbf24; --purple:#c084fc; --text:#eef3ff;
+  --muted:#6b7a8f; --radius-lg:24px; --radius-md:14px; --radius-sm:10px;
 }
 body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;overflow-x:hidden}
+.gradient-bg{background:radial-gradient(ellipse at 20% 30%, rgba(0,229,255,0.08), transparent)}
 ::-webkit-scrollbar{width:5px;height:5px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--cyan);border-radius:9px}
-.glow-text{background:linear-gradient(135deg,#fff,var(--cyan));-webkit-background-clip:text;background-clip:text;color:transparent}
+
 /* header */
-.header{position:sticky;top:0;z-index:100;backdrop-filter:blur(24px);background:rgba(5,7,10,0.85);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;flex-wrap:wrap;align-items:center;gap:16px}
-.logo{font-family:var(--display);font-size:24px;font-weight:800;letter-spacing:-0.02em}
-.logo span{color:var(--cyan)}.logo small{font-size:12px;color:var(--muted);font-weight:400;letter-spacing:0}
-.search-area{flex:1;max-width:520px;display:flex;gap:8px}
-.search-area input{flex:1;background:var(--card);border:1px solid var(--border);border-radius:60px;padding:12px 18px;color:var(--text);font-size:14px;outline:none;transition:all var(--transition)}
-.search-area input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px var(--cyan-glow)}
-.search-area button{background:var(--cyan);border:none;border-radius:60px;padding:0 24px;font-weight:700;color:#05070a;cursor:pointer;transition:0.15s}
-.search-area button:hover{opacity:0.85;transform:scale(0.97)}
-.mode-switch{display:flex;gap:8px;background:var(--surface);padding:4px;border-radius:48px;border:1px solid var(--border)}
-.mode-btn{background:transparent;border:none;padding:6px 18px;border-radius:48px;color:var(--muted);font-weight:600;cursor:pointer;transition:all 0.15s}
-.mode-btn.active{background:var(--cyan);color:#05070a;box-shadow:0 4px 12px rgba(0,229,255,0.3)}
-.proxy-badge{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.3);border-radius:60px;padding:6px 14px;font-size:12px;font-family:var(--mono);cursor:pointer;transition:0.1s}
-.proxy-badge:hover{border-color:var(--cyan)}
-/* layout */
-.app{display:grid;grid-template-columns:1fr 340px;gap:20px;padding:24px;max-width:1600px;margin:0 auto}
-@media(max-width:880px){.app{grid-template-columns:1fr;padding:16px}}
-.player-col{display:flex;flex-direction:column;gap:16px}
-.video-container{background:#000;border-radius:var(--radius);overflow:hidden;border:1px solid var(--border);position:relative}
+.glass-header{position:sticky;top:0;z-index:100;backdrop-filter:blur(20px);background:rgba(10,12,18,0.85);border-bottom:1px solid var(--border);padding:14px 24px}
+.header-inner{max-width:1600px;margin:0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:16px}
+.logo{font-family:'JetBrains Mono',monospace;font-size:20px;font-weight:700}
+.logo span{color:var(--cyan)}.logo small{font-size:11px;color:var(--muted);font-weight:400}
+.site-selector{background:var(--surface);border-radius:60px;padding:4px 8px;display:flex;flex-wrap:wrap;gap:4px;max-width:600px;overflow-x:auto}
+.site-btn{background:transparent;border:none;padding:8px 16px;border-radius:60px;color:var(--muted);font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:all 0.15s}
+.site-btn.active{background:var(--cyan);color:#0a0c12;box-shadow:0 0 12px rgba(0,229,255,0.3)}
+.site-btn:hover:not(.active){background:var(--card);color:var(--text)}
+.proxy-status{background:rgba(0,229,255,0.08);border:1px solid rgba(0,229,255,0.25);border-radius:60px;padding:6px 14px;font-size:11px;font-family:monospace;margin-left:auto;cursor:pointer}
+
+/* main layout */
+.main-grid{display:grid;grid-template-columns:1fr 360px;gap:24px;max-width:1600px;margin:0 auto;padding:24px}
+@media(max-width:960px){.main-grid{grid-template-columns:1fr}}
+.player-section{display:flex;flex-direction:column;gap:20px}
+.video-box{background:#000;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);position:relative}
 .video-wrapper{position:relative;padding-bottom:56.25%;background:#000}
-#videoPlayer{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain;background:#000}
-.controls-bar{background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
-.ctrl-group{display:flex;gap:6px;align-items:center}
-.toggle-switch{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1px solid var(--border);border-radius:32px;padding:6px 14px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.1s}
-.toggle-switch.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow)}
-.servers-bar{background:var(--surface);border-radius:var(--radius-sm);padding:10px 14px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;border:1px solid var(--border)}
-.servers-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
-.server-tab{background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer;transition:all 0.1s;display:flex;align-items:center;gap:6px}
-.server-tab.active{border-color:var(--cyan);background:var(--cyan-glow);color:var(--cyan)}
-.server-tab i{font-size:12px}
-.info-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden}
-.info-header{padding:16px;border-bottom:1px solid var(--border);display:flex;gap:16px}
-.poster-img{width:70px;height:105px;object-fit:cover;border-radius:12px;background:var(--card)}
-.info-details{flex:1}
-.info-details h3{font-size:18px;font-weight:700;margin-bottom:6px}
-.meta-badge{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
-.badge{background:var(--card);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:500}
-.episode-panel{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-top:16px;padding:16px}
-.episode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(60px,1fr));gap:8px;max-height:240px;overflow-y:auto;margin-top:12px}
-.ep-btn{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 4px;font-size:13px;font-weight:600;text-align:center;cursor:pointer;transition:0.08s}
-.ep-btn.active{background:var(--cyan);color:#05070a;border-color:var(--cyan)}
-.recommend-list{display:flex;flex-direction:column;gap:10px;margin-top:12px}
-.rec-item{display:flex;gap:12px;background:var(--card);border-radius:12px;padding:8px;cursor:pointer;border:1px solid var(--border);transition:0.1s}
-.rec-item:hover{border-color:var(--cyan);transform:translateX(4px)}
-.rec-img{width:42px;height:63px;object-fit:cover;border-radius:8px}
-.rec-info h4{font-size:13px;font-weight:600}
-.rec-info p{font-size:10px;color:var(--muted)}
-.log-area{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);margin-top:16px;padding:12px;max-height:200px;overflow-y:auto;font-size:11px;font-family:monospace}
-.log-entry{padding:4px 0;border-bottom:1px solid var(--border);color:var(--muted)}
-.log-entry.info{color:var(--cyan)}.log-entry.ok{color:var(--green)}.log-entry.err{color:var(--red)}
-.loader-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.8);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:20;backdrop-filter:blur(8px);border-radius:var(--radius)}
-.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite}
+#videoPlayer{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:contain}
+.loader-overlay{position:absolute;inset:0;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;z-index:10}
+.spinner{width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--cyan);border-radius:50%;animation:spin 0.8s linear infinite}
 @keyframes spin{to{transform:rotate(360deg)}}
-.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border-left:3px solid var(--cyan);padding:12px 20px;border-radius:12px;z-index:999;font-size:13px;box-shadow:0 8px 24px rgba(0,0,0,0.4);animation:fadeIn 0.2s}
-@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}}
+.controls-row{background:var(--surface);border-radius:var(--radius-md);padding:12px 18px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;border:1px solid var(--border)}
+.toggle-badge{display:inline-flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:40px;padding:6px 14px;font-size:12px;font-weight:500;cursor:pointer}
+.toggle-badge.active{border-color:var(--cyan);color:var(--cyan);background:var(--cyan-glow)}
+.server-strip{background:var(--surface);border-radius:var(--radius-md);padding:10px 16px;border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.server-tab{background:var(--card);border:1px solid var(--border);border-radius:30px;padding:6px 14px;font-size:12px;cursor:pointer;transition:0.1s;display:flex;align-items:center;gap:6px}
+.server-tab.active{border-color:var(--cyan);background:var(--cyan-glow);color:var(--cyan)}
+.param-bar{background:var(--surface);border-radius:var(--radius-md);padding:14px 16px;border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end}
+.param-field{display:flex;flex-direction:column;gap:4px;min-width:120px}
+.param-field label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.param-field input, .param-field select{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:8px 12px;color:var(--text);font-size:12px;outline:none}
+.param-field input:focus{border-color:var(--cyan)}
+.action-btn{background:var(--cyan);border:none;border-radius:40px;padding:8px 24px;font-weight:700;color:#0a0c12;cursor:pointer;margin-left:auto}
+.right-panel{display:flex;flex-direction:column;gap:20px}
+.info-card{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);overflow:hidden}
+.info-header{padding:16px;display:flex;gap:14px;border-bottom:1px solid var(--border)}
+.info-poster{width:80px;height:120px;object-fit:cover;border-radius:12px;background:var(--card)}
+.info-details h3{font-size:18px;font-weight:700;margin-bottom:6px}
+.meta-tags{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.tag{background:var(--card);border-radius:20px;padding:3px 12px;font-size:10px;font-weight:500}
+.synopsis{font-size:12px;color:var(--muted);line-height:1.5;margin-top:8px}
+.log-console{background:var(--surface);border-radius:var(--radius-lg);border:1px solid var(--border);padding:12px;max-height:280px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:11px}
+.log-entry{padding:5px 0;border-bottom:1px solid var(--border);color:var(--muted)}
+.log-entry.info{color:var(--cyan)}.log-entry.ok{color:var(--green)}.log-entry.err{color:var(--red)}.log-entry.warn{color:var(--yellow)}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border-left:3px solid var(--cyan);padding:12px 20px;border-radius:12px;z-index:1000;font-size:13px;animation:fadeIn 0.2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}}
 .hidden{display:none}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <div class="logo">NEXUS<span>STREAM</span><small> · hybrid player</small></div>
-  <div class="search-area">
-    <input type="text" id="globalSearch" placeholder="Search movies, TV shows, anime... (TMDB + Jikan)">
-    <button id="searchBtn"><i class="fas fa-search"></i> Search</button>
+<div class="glass-header">
+  <div class="header-inner">
+    <div class="logo">ENC<span>DEC</span><small> · 14 SITES API</small></div>
+    <div class="site-selector" id="siteSelector">
+      <!-- 14 sites from Python script -->
+    </div>
+    <div class="proxy-status" id="proxyStatusBtn"><i class="fas fa-shield-alt"></i> <span id="proxyLabel">proxy: foxy-doxy</span></div>
   </div>
-  <div class="mode-switch">
-    <button class="mode-btn active" data-mode="tmdb">🎬 Movies/TV</button>
-    <button class="mode-btn" data-mode="anime">🍥 Anime (MAL)</button>
-  </div>
-  <div class="proxy-badge" id="proxyBadge"><i class="fas fa-shield-alt"></i> <span id="proxyLabel">foxy-doxy active</span></div>
 </div>
 
-<div class="app">
-  <!-- LEFT: PLAYER COLUMN -->
-  <div class="player-col">
-    <div class="video-container">
-      <div class="video-wrapper" id="videoWrapper">
+<div class="main-grid">
+  <div class="player-section">
+    <div class="video-box">
+      <div class="video-wrapper">
         <video id="videoPlayer" controls playsinline crossorigin></video>
         <div id="loaderOverlay" class="loader-overlay hidden">
           <div class="spinner"></div>
-          <span>resolving stream · proxy active</span>
+          <span>decrypting via enc-dec.app API...</span>
         </div>
       </div>
-      <div class="controls-bar">
-        <div class="ctrl-group"><div class="toggle-switch" id="autoPlayToggle"><i class="fas fa-play-circle"></i> Autoplay</div></div>
-        <div class="ctrl-group"><div class="toggle-switch" id="autoNextToggle"><i class="fas fa-forward-step"></i> AutoNext</div></div>
+      <div class="controls-row">
+        <div class="toggle-badge" id="autoplayToggle"><i class="fas fa-play-circle"></i> Autoplay</div>
+        <div class="toggle-badge" id="proxyToggle"><i class="fas fa-globe"></i> Route via Proxy</div>
       </div>
-      <div class="servers-bar" id="serversBar">
-        <span class="servers-label"><i class="fas fa-server"></i> source</span>
-        <!-- dynamic server tabs will be injected -->
+      <div class="server-strip" id="serverStrip">
+        <span style="font-size:11px;color:var(--muted)"><i class="fas fa-hdd"></i> servers</span>
+        <!-- dynamic server buttons -->
+      </div>
+      <div class="param-bar" id="paramBar">
+        <!-- dynamic params based on selected site -->
+      </div>
+      <div class="param-bar" style="margin-top:0;border-top:none">
+        <button id="executeBtn" class="action-btn"><i class="fas fa-play"></i> DECRYPT & PLAY</button>
       </div>
     </div>
-    <div class="episode-panel" id="episodePanel" style="display:none">
-      <div style="display:flex;justify-content:space-between;align-items:center"><strong><i class="fas fa-list"></i> Episodes</strong><span id="episodeCount"></span></div>
-      <div id="episodeGrid" class="episode-grid"></div>
+    <div class="log-console" id="logConsole">
+      <div class="log-entry sys">⚡ ENC-DEC API bridge active · 14 sites supported</div>
+      <div class="log-entry sys">📡 proxy: foxy-doxy.workers.dev (headers injection ready)</div>
     </div>
-    <div class="log-area" id="logArea"><div class="log-entry sys">⚡ system ready · proxy fallback enabled</div></div>
   </div>
 
-  <!-- RIGHT: INFO + RECOMMENDATIONS -->
-  <div class="right-col">
-    <div class="info-panel" id="infoPanel">
+  <div class="right-panel">
+    <div class="info-card" id="infoCard">
       <div class="info-header">
-        <img id="detailPoster" class="poster-img" src="https://via.placeholder.com/70x105?text=cover" alt="">
+        <img id="infoPoster" class="info-poster" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 150'%3E%3Crect width='100' height='150' fill='%23191e2a'/%3E%3Ctext x='50' y='75' fill='%236b7a8f' font-size='10' text-anchor='middle'%3ENo cover%3C/text%3E%3C/svg%3E" alt="">
         <div class="info-details">
-          <h3 id="detailTitle">Select a title</h3>
-          <div class="meta-badge" id="detailMeta"></div>
-          <p id="detailOverview" style="font-size:12px;color:var(--muted);margin-top:8px">Search movies, series or anime. Streams will be fetched via dynamic servers + proxy routing.</p>
+          <h3 id="infoTitle">Select a streaming site</h3>
+          <div class="meta-tags" id="infoMeta"></div>
+          <p class="synopsis" id="infoSynopsis">Choose from 14 services: Videasy, PrimeSrc, VidLink, VidFast, VidSync, XPrime, Hexa, LordFlix, YFlix/1Movies, Abyss, Reanime, MegaUp, RapidShare, AnimeKai. Each uses enc-dec.app decryption pipeline.</p>
         </div>
       </div>
     </div>
-    <div class="info-panel" style="margin-top:16px">
-      <div style="padding:12px 16px;border-bottom:1px solid var(--border);font-weight:700"><i class="fas fa-thumbs-up"></i> You might also like</div>
-      <div id="recommendList" class="recommend-list" style="padding:8px"></div>
+    <div class="info-card" style="padding:14px">
+      <div style="font-weight:600;margin-bottom:10px"><i class="fas fa-list-ul"></i> Decrypt log / extracted streams</div>
+      <div id="decryptResult" style="font-size:11px;font-family:monospace;color:var(--cyan);word-break:break-all;max-height:200px;overflow-y:auto"></div>
     </div>
   </div>
 </div>
 
 <script>
-  // ======================== CONFIG ============================
-  const TMDB_KEY = "6fad3f86b8452ee232deb7977d7dcf58";
-  const TMDB_BASE = "https://api.themoviedb.org/3";
-  const TMDB_IMG = "https://image.tmdb.org/t/p/w500";
-  
-  // PROXY CONFIG (from second code - foxy doxy & donka)
-  const PROXY_LIST = {
-    foxy: "https://foxy-doxy.andruilsyestems.workers.dev",
-    donka: "https://donka-bonka-proxy.onrender.com"
-  };
-  let activeProxy = PROXY_LIST.foxy;
-  let useProxy = true;
-  
-  // STREAM SERVERS (M3U8 / embed interceptors) - 5 main servers
-  // For TMDB movies/tv: RiveStream style (download pages with m3u8 interception)
-  // For Anime: MegaPlay / VidWish style (MAL endpoints)
-  const TMDB_SERVERS = [
-    { id: "rivestream", label: "🎬 RiveStream", icon: "🌊", buildUrl: (type, id, season, ep) => `https://rivestream.ru/download?type=${type}&id=${id}${type==='tv'?`&season=${season}&episode=${ep}`:''}` },
-    { id: "megadrive", label: "📀 MegaPlay", icon: "⚡", buildUrl: (type, id, season, ep) => `https://megaplay.buzz/stream/tmdb/${id}/${type==='tv'?`${season}/${ep}`:'movie'}` },
-    { id: "hydrax", label: "💧 HydraX", icon: "🌀", buildUrl: (type, id, season, ep) => `https://playhydrax.com/embed/${type}/${id}${type==='tv'?`/${season}/${ep}`:''}` },
-    { id: "vidlink", label: "🔗 VidLink", icon: "🔗", buildUrl: (type, id, season, ep) => `https://vidlink.pro/e/${type}/${id}${type==='tv'?`/${season}/${ep}`:''}` },
-    { id: "rapidcdn", label: "⚡ RapidShare", icon: "🚀", buildUrl: (type, id, season, ep) => `https://rapidshare.cx/embed/${type}/${id}${type==='tv'?`/${season}/${ep}`:''}` }
-  ];
-  
-  const ANIME_SERVERS = [
-    { id: "mp-sub", label: "🍥 MegaPlay SUB", icon: "🇯🇵", buildUrl: (malId, ep) => `https://megaplay.buzz/stream/mal/${malId}/${ep}/sub` },
-    { id: "mp-dub", label: "🎙️ MegaPlay DUB", icon: "🇺🇸", buildUrl: (malId, ep) => `https://megaplay.buzz/stream/mal/${malId}/${ep}/dub` },
-    { id: "vw-sub", label: "📺 VidWish SUB", icon: "🎌", buildUrl: (malId, ep) => `https://vidwish.live/stream/mal/${malId}/${ep}/sub` },
-    { id: "vw-dub", label: "🔊 VidWish DUB", icon: "🌎", buildUrl: (malId, ep) => `https://vidwish.live/stream/mal/${malId}/${ep}/dub` },
-    { id: "anifast", label: "⚡ AniFast", icon: "💨", buildUrl: (malId, ep) => `https://anifast.pro/embed/${malId}/${ep}` }
-  ];
-  
-  // GLOBAL STATE
-  let currentMode = "tmdb";     // "tmdb" or "anime"
-  let currentContent = null;    // tmdb item or mal anime object
-  let currentMediaType = "movie"; // movie/tv for tmdb
-  let currentSeason = 1, currentEpisode = 1, totalEpisodes = 0;
-  let currentMalId = null, currentAnimeData = null;
-  let currentServerId = null;
-  let hlsInstance = null;
-  let autoPlay = true, autoNext = true;
-  let nextCountdownTimer = null;
-  let isPlayingEnded = false;
-  
-  // helper: toast
-  function toast(msg, type="info"){ const t=document.createElement('div'); t.className='toast'; t.innerHTML=`<i class="fas fa-${type==='ok'?'check-circle':'info-circle'}"></i> ${msg}`; document.body.appendChild(t); setTimeout(()=>t.remove(),2800); }
-  function log(msg, level="info"){ const logDiv=document.getElementById('logArea'); const entry=document.createElement('div'); entry.className=`log-entry ${level}`; entry.innerHTML=`[${new Date().toLocaleTimeString()}] ${msg}`; logDiv.appendChild(entry); entry.scrollIntoView({behavior:'smooth',block:'nearest'}); if(logDiv.children.length>50) logDiv.removeChild(logDiv.children[0]); }
-  
-  // PROXY URL builder (like second code)
-  function buildProxiedUrl(originalUrl, headersObj = {}) {
-    if(!useProxy) return originalUrl;
-    const base = activeProxy;
-    const encUrl = btoa(encodeURIComponent(originalUrl));
-    let proxyUrl = `${base}/proxy?url=${encUrl}`;
-    if(Object.keys(headersObj).length){
-      const encHeaders = btoa(encodeURIComponent(JSON.stringify(headersObj)));
-      proxyUrl += `&headers=${encHeaders}`;
+// ======================== ALL 14 SITES CONFIGS (mirroring Python) ========================
+const API_BASE = "https://enc-dec.app/api";
+
+// Proxy configuration (from second code - foxy doxy & donka)
+const PROXY_LIST = {
+  foxy: "https://foxy-doxy.andruilsyestems.workers.dev",
+  donka: "https://donka-bonka-proxy.onrender.com"
+};
+let activeProxyUrl = PROXY_LIST.foxy;
+let useProxy = true;
+
+// Helper: build proxy URL for any stream (m3u8/mp4)
+function buildProxiedUrl(originalUrl, customHeaders = {}) {
+  if (!useProxy) return originalUrl;
+  const encUrl = btoa(encodeURIComponent(originalUrl));
+  let proxyUrl = `${activeProxyUrl}/proxy?url=${encUrl}`;
+  if (Object.keys(customHeaders).length) {
+    const encHeaders = btoa(encodeURIComponent(JSON.stringify(customHeaders)));
+    proxyUrl += `&headers=${encHeaders}`;
+  }
+  return proxyUrl;
+}
+
+// API caller
+async function callDecryptAPI(endpoint, payload) {
+  log(`→ API call: ${endpoint}`, 'info');
+  const res = await fetch(`${API_BASE}${endpoint}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+  const data = await res.json();
+  if (data.status !== 200) throw new Error(data.error || `API error ${data.status}`);
+  return data.result;
+}
+
+async function callGetAPI(endpoint, params = {}) {
+  const url = `${API_BASE}${endpoint}?${new URLSearchParams(params)}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status !== 200) throw new Error(data.error || `API error ${data.status}`);
+  return data.result;
+}
+
+// Site definitions (all 14 from Python script)
+const SITES = [
+  { id: 'videasy', name: 'Videasy (cineby.sc)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Game of Thrones', media_type: 'tv', year: '2011', tmdb_id: '1399', imdb_id: 'tt0944947', season: '1', episode: '1', server: 'cdn' } },
+  { id: 'primesrc', name: 'PrimeSrc (primesrc.me)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Game of Thrones', media_type: 'tv', year: '2011', tmdb_id: '1399', imdb_id: 'tt0944947', season: '1', episode: '1' } },
+  { id: 'vidlink', name: 'VidLink (vidlink.pro)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Cyberpunk: Edgerunners', media_type: 'tv', year: '2022', tmdb_id: '105248', season: '1', episode: '1' } },
+  { id: 'vidfast', name: 'VidFast (vidfast.pro)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Game of Thrones', media_type: 'tv', year: '2011', tmdb_id: '1399', season: '1', episode: '1', version: '1' } },
+  { id: 'vidsync', name: 'VidSync (vidsync.xyz)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Game of Thrones', media_type: 'tv', year: '2011', tmdb_id: '1399', season: '1', episode: '1', server: 'cinevault' } },
+  { id: 'xprime', name: 'XPrime (mznxiwqjdiq00239q.space)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Cyberpunk: Edgerunners', media_type: 'tv', year: '2022', tmdb_id: '105248', imdb_id: 'tt12590266', season: '1', episode: '1', server: 'primebox' } },
+  { id: 'hexa', name: 'Hexa / Flixer (hexa.su)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Cyberpunk: Edgerunners', media_type: 'tv', year: '2022', tmdb_id: '105248', imdb_id: 'tt12590266', season: '1', episode: '1' } },
+  { id: 'lordflix', name: 'LordFlix (lordflix.org)', needsTmdb: true, needsSeasonEp: true, defaultParams: { title: 'Game of Thrones', media_type: 'series', year: '2011', tmdb_id: '1399', imdb_id: 'tt0944947', season: '1', episode: '1', server: 'Berlin' } },
+  { id: 'yflix', name: '1Movies / YFlix (full flow)', needsUrl: true, defaultParams: { url: 'https://yflix.to/watch/cyberpunk-edgerunners.b4d24', season: '1', episode: '1', server_id: '1' } },
+  { id: 'abyss', name: 'Abyss (playhydrax.com)', needsContentId: true, defaultParams: { content_id: 'K8R6OOjS7' } },
+  { id: 'reanime', name: 'Reanime (reanime.to)', needsAnilist: true, defaultParams: { title: 'Cyberpunk Edgerunners', anilist_id: '120377', episode: '1' } },
+  { id: 'megaup', name: 'MegaUp (AnimeKai embed)', needsUrl: true, defaultParams: { view_url: 'https://animekai.to/ajax/links/view?id=dIG98qei6A&_=xQm9tJfLwGhz_0Eq8S_YAHYkwp-qSvLfm50W5X1nyd2NnAcpzTUWyAgck4I' } },
+  { id: 'rapidshare', name: 'RapidShare (YFlix embed)', needsUrl: true, defaultParams: { view_url: 'https://yflix.to/ajax/links/view?id=cYe--KWj5g&_=VU7EzW-r3IptzPzkwFi43K6fMXG1W-twXRnEjr7jYvY2mi6oJTqlmYTf' } },
+  { id: 'animekai', name: 'AnimeKai (animekai.to full)', needsUrl: true, defaultParams: { url: 'https://animekai.to/watch/cyberpunk-edgerunners-x6qm', season: '1', episode: '1', sub_type: 'softsub', server_id: '1' } }
+];
+
+let currentSite = SITES[0];
+let currentParams = { ...currentSite.defaultParams };
+let hlsInstance = null;
+let autoPlay = true;
+
+// Helper functions
+function log(msg, level = 'sys') {
+  const logDiv = document.getElementById('logConsole');
+  const entry = document.createElement('div');
+  entry.className = `log-entry ${level}`;
+  entry.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  logDiv.appendChild(entry);
+  entry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (logDiv.children.length > 50) logDiv.removeChild(logDiv.children[0]);
+}
+
+function toast(msg) {
+  let t = document.querySelector('.toast');
+  if (t) t.remove();
+  t = document.createElement('div');
+  t.className = 'toast';
+  t.innerHTML = `<i class="fas fa-info-circle"></i> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 2800);
+}
+
+// Site execution functions (matching Python logic via API)
+async function executeSite() {
+  const loader = document.getElementById('loaderOverlay');
+  const decryptResultDiv = document.getElementById('decryptResult');
+  loader.classList.remove('hidden');
+  decryptResultDiv.innerHTML = '<span style="color:var(--cyan)">⏳ calling enc-dec.app...</span>';
+  try {
+    let streamUrl = null;
+    const siteId = currentSite.id;
+    
+    // Each site's decryption pipeline
+    if (siteId === 'videasy') {
+      const { title, media_type, year, tmdb_id, imdb_id, season, episode, server } = currentParams;
+      const encTitle = encodeURIComponent(encodeURIComponent(title));
+      const fetchUrl = `https://api.videasy.net/${server}/sources-with-title?title=${encTitle}&mediaType=${media_type}&year=${year}&episodeId=${episode}&seasonId=${season}&tmdbId=${tmdb_id}&imdbId=${imdb_id}`;
+      const encData = await fetch(fetchUrl).then(r => r.text());
+      const result = await callDecryptAPI('/dec-videasy', { text: encData, id: tmdb_id });
+      decryptResultDiv.innerHTML = `<pre style="white-space:pre-wrap">${JSON.stringify(result, null, 2)}</pre>`;
+      streamUrl = result?.sources?.[0]?.file || result?.file || result?.url;
     }
-    return proxyUrl;
-  }
-  
-  // Load stream via HLS.js or native
-  function loadStreamIntoPlayer(streamUrl, customHeaders = {}) {
-    const video = document.getElementById('videoPlayer');
-    const loader = document.getElementById('loaderOverlay');
-    loader.classList.remove('hidden');
-    if(hlsInstance){ hlsInstance.destroy(); hlsInstance=null; }
-    video.pause(); video.src = '';
-    let finalUrl = streamUrl;
-    if(useProxy && !streamUrl.startsWith('blob:')) finalUrl = buildProxiedUrl(streamUrl, customHeaders);
-    log(`loading stream: ${finalUrl.substring(0,80)}...`, 'info');
-    if (finalUrl.includes('.m3u8') && Hls.isSupported()) {
-      hlsInstance = new Hls({ enableWorker: true, lowLatencyMode: false });
-      hlsInstance.loadSource(finalUrl);
-      hlsInstance.attachMedia(video);
-      hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => { loader.classList.add('hidden'); if(autoPlay) video.play().catch(e=>log(`autoplay blocked: ${e}`, 'warn')); });
-      hlsInstance.on(Hls.Events.ERROR, (_, data) => { if(data.fatal){ log(`HLS error: ${data.details}`, 'err'); loader.classList.add('hidden'); toast('Stream error, try next server','err'); } });
-    } else if (finalUrl.match(/\.(mp4|webm)$/i) || video.canPlayType('application/vnd.apple.mpegurl')) {
-      video.src = finalUrl;
-      video.oncanplay = () => { loader.classList.add('hidden'); if(autoPlay) video.play().catch(e=>log(e.message,'warn')); };
-      video.onerror = () => { loader.classList.add('hidden'); toast('Video load error','err'); };
-    } else { loader.classList.add('hidden'); toast('Unsupported stream format','err'); }
-    // episode ended detection for auto-next
-    video.ontimeupdate = () => { if(video.duration && (video.duration - video.currentTime) < 1.2 && !video.paused && !isPlayingEnded){ isPlayingEnded=true; handleEpisodeEnded(); } };
-    video.onplaying = () => { isPlayingEnded=false; };
-  }
-  
-  function handleEpisodeEnded(){
-    if(!autoNext) return;
-    if(currentMode === 'tmdb' && currentMediaType === 'tv'){
-      if(currentEpisode < totalEpisodes){
-        toast(`AutoNext: Episode ${currentEpisode+1} in 3s`, 'ok');
-        setTimeout(()=>{ currentEpisode++; updateEpisodeUI(); playCurrentStream(); }, 3000);
-      } else toast('Final episode reached', 'info');
+    else if (siteId === 'primesrc') {
+      const { imdb_id, media_type, season, episode } = currentParams;
+      const apiUrl = `https://primesrc.me/api/v1/s?imdb=${imdb_id}&season=${season}&episode=${episode}&type=${media_type}`;
+      const resp = await fetch(apiUrl).then(r => r.json());
+      const key = resp.servers?.[0]?.key;
+      if (!key) throw new Error('No server key');
+      const embedApi = `https://primesrc.me/api/v1/l?key=${key}`;
+      const solveUrl = `${API_BASE}/solve-primesrc?url=${encodeURIComponent(embedApi)}`;
+      const link = await fetch(solveUrl).then(r => r.json()).then(d => d.result);
+      decryptResultDiv.innerHTML = `<strong>PrimeSrc Link:</strong><br>${link}`;
+      streamUrl = link;
     }
-    else if(currentMode === 'anime' && currentAnimeData && currentEpisode < (currentAnimeData.episodes||999)){
-      toast(`AutoNext: Ep ${currentEpisode+1} soon`, 'ok');
-      setTimeout(()=>{ currentEpisode++; updateEpisodeUI(); playCurrentAnimeStream(); },3000);
+    else if (siteId === 'vidlink') {
+      const { tmdb_id, media_type, season, episode } = currentParams;
+      const encrypted = await callGetAPI('/enc-vidlink', { text: tmdb_id });
+      const url = `https://vidlink.pro/api/b/${media_type}/${encrypted}/${season}/${episode}`;
+      const data = await fetch(url).then(r => r.json());
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+      streamUrl = data?.sources?.[0]?.file || data?.file;
     }
-  }
-  
-  // TMDB: fetch seasons & episodes
-  async function fetchTmdbEpisodes(tvId, seasonNum){
-    try{
-      const res = await fetch(`${TMDB_BASE}/tv/${tvId}/season/${seasonNum}?api_key=${TMDB_KEY}`);
-      const data = await res.json();
-      const eps = data.episodes || [];
-      totalEpisodes = eps.length;
-      document.getElementById('episodeCount').innerText = `${totalEpisodes} eps`;
-      const grid = document.getElementById('episodeGrid'); grid.innerHTML='';
-      eps.forEach(ep=>{
-        const btn=document.createElement('div'); btn.className='ep-btn'; btn.innerText=ep.episode_number;
-        if(ep.episode_number===currentEpisode) btn.classList.add('active');
-        btn.onclick=()=>{ currentEpisode=ep.episode_number; updateEpisodeUI(); playCurrentStream(); };
-        grid.appendChild(btn);
-      });
-      document.getElementById('episodePanel').style.display='block';
-    }catch(e){ log('failed load episodes','err'); totalEpisodes=0; }
-  }
-  
-  // render info panel for TMDB
-  function renderTmdbInfo(item, type){
-    const title = item.title || item.name;
-    const poster = item.poster_path ? TMDB_IMG+item.poster_path : 'https://via.placeholder.com/70x105';
-    const year = (item.release_date||item.first_air_date||'').slice(0,4);
-    const rating = item.vote_average ? item.vote_average.toFixed(1) : '—';
-    document.getElementById('detailTitle').innerHTML = title;
-    document.getElementById('detailPoster').src = poster;
-    document.getElementById('detailMeta').innerHTML = `<span class="badge">⭐ ${rating}</span><span class="badge">${type==='movie'?'Movie':'TV'}</span><span class="badge">${year}</span>`;
-    document.getElementById('detailOverview').innerText = item.overview?.slice(0,220) || 'No description available.';
-    if(type === 'tv') fetchTmdbEpisodes(item.id, currentSeason);
-    else document.getElementById('episodePanel').style.display='none';
-  }
-  
-  // play tmdb stream using selected server
-  function playCurrentStream(){
-    if(!currentContent) return;
-    const server = TMDB_SERVERS.find(s=>s.id===currentServerId) || TMDB_SERVERS[0];
-    let url = '';
-    if(currentMediaType === 'movie') url = server.buildUrl('movie', currentContent.id, null, null);
-    else url = server.buildUrl('tv', currentContent.id, currentSeason, currentEpisode);
-    log(`🎬 ${server.label} · ${currentMediaType} ${currentMediaType==='tv'?`S${currentSeason}E${currentEpisode}`:''}`, 'info');
-    loadStreamIntoPlayer(url, { Referer: 'https://rivestream.ru', Origin: 'https://rivestream.ru' });
-  }
-  
-  // ANIME SECTION using Jikan API
-  async function searchAnime(query){
-    try{
-      const res = await fetch(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=24`);
-      const data = await res.json();
-      return data.data || [];
-    }catch(e){ log('anime api error','err'); return []; }
-  }
-  async function fetchAnimeById(malId){
-    const res = await fetch(`https://api.jikan.moe/v4/anime/${malId}`);
-    const data = await res.json();
-    return data.data;
-  }
-  function renderAnimeInfo(anime){
-    const title = anime.title_english || anime.title;
-    const poster = anime.images?.jpg?.large_image_url || 'https://via.placeholder.com/70x105';
-    const score = anime.score || 'N/A';
-    const episodes = anime.episodes || '?';
-    document.getElementById('detailTitle').innerHTML = title;
-    document.getElementById('detailPoster').src = poster;
-    document.getElementById('detailMeta').innerHTML = `<span class="badge">⭐ ${score}</span><span class="badge">${episodes} eps</span><span class="badge">MAL #${anime.mal_id}</span>`;
-    document.getElementById('detailOverview').innerText = (anime.synopsis || '').slice(0,240) || 'No synopsis.';
-    if(episodes !== '?' && episodes>0){
-      totalEpisodes = parseInt(episodes);
-      document.getElementById('episodeCount').innerText = `${totalEpisodes} eps`;
-      const grid = document.getElementById('episodeGrid'); grid.innerHTML='';
-      for(let i=1;i<=Math.min(totalEpisodes,200);i++){
-        const btn=document.createElement('div'); btn.className='ep-btn'; btn.innerText=i;
-        if(i===currentEpisode) btn.classList.add('active');
-        btn.onclick=()=>{ currentEpisode=i; updateEpisodeUI(); playCurrentAnimeStream(); };
-        grid.appendChild(btn);
-      }
-      document.getElementById('episodePanel').style.display='block';
-    } else document.getElementById('episodePanel').style.display='none';
-  }
-  function playCurrentAnimeStream(){
-    if(!currentMalId) return;
-    const server = ANIME_SERVERS.find(s=>s.id===currentServerId) || ANIME_SERVERS[0];
-    const url = server.buildUrl(currentMalId, currentEpisode);
-    log(`🍥 ${server.label} · Episode ${currentEpisode}`, 'ok');
-    loadStreamIntoPlayer(url, { Referer: 'https://megaplay.buzz', Origin: 'https://megaplay.buzz' });
-  }
-  function updateEpisodeUI(){
-    document.querySelectorAll('.ep-btn').forEach((btn,idx)=>{
-      const epNum = parseInt(btn.innerText);
-      if(epNum===currentEpisode) btn.classList.add('active'); else btn.classList.remove('active');
-    });
-  }
-  
-  // RENDER SEARCH RESULTS (grid modal style but we reuse right panel for cards list)
-  function showSearchResults(items, type){
-    const container = document.getElementById('recommendList');
-    container.innerHTML = '';
-    items.slice(0,12).forEach(item=>{
-      const div = document.createElement('div'); div.className='rec-item';
-      const img = document.createElement('img'); img.className='rec-img';
-      img.src = item.poster_path ? TMDB_IMG+item.poster_path : (item.images?.jpg?.image_url || 'https://via.placeholder.com/42x63');
-      img.onerror = ()=>img.src='https://via.placeholder.com/42x63';
-      const infoDiv = document.createElement('div'); infoDiv.className='rec-info';
-      const title = item.title || item.name || (item.title_english || item.title);
-      infoDiv.innerHTML = `<h4>${title}</h4><p>${item.media_type === 'movie' ? 'Movie' : (item.media_type==='tv'?'TV':'Anime')}</p>`;
-      div.appendChild(img); div.appendChild(infoDiv);
-      div.onclick = async ()=>{
-        if(type === 'tmdb'){
-          currentContent = item; currentMediaType = item.media_type; currentSeason=1; currentEpisode=1;
-          if(currentMediaType === 'movie') totalEpisodes=0;
-          renderTmdbInfo(item, currentMediaType);
-          if(currentMediaType === 'tv'){ await fetchTmdbEpisodes(item.id,1); }
-          playCurrentStream();
-        } else {
-          const fullAnime = await fetchAnimeById(item.mal_id);
-          if(fullAnime){
-            currentAnimeData = fullAnime; currentMalId = fullAnime.mal_id; currentEpisode=1;
-            renderAnimeInfo(fullAnime);
-            playCurrentAnimeStream();
-          }
-        }
-        toast(`loaded: ${title}`, 'ok');
-      };
-      container.appendChild(div);
-    });
-    if(!items.length) container.innerHTML = '<div style="padding:16px;color:var(--muted)">No results. try different keyword</div>';
-  }
-  
-  // GLOBAL SEARCH handler
-  async function handleSearch(){
-    const query = document.getElementById('globalSearch').value.trim();
-    if(!query) return toast('enter title', 'warn');
-    log(`search: ${query} (mode: ${currentMode})`, 'info');
-    if(currentMode === 'tmdb'){
-      const movieRes = await fetch(`${TMDB_BASE}/search/multi?api_key=${TMDB_KEY}&query=${encodeURIComponent(query)}`);
-      const data = await movieRes.json();
-      const filtered = (data.results||[]).filter(r=>r.media_type==='movie'||r.media_type==='tv');
-      showSearchResults(filtered, 'tmdb');
+    else if (siteId === 'vidfast') {
+      const { tmdb_id, media_type, season, episode, version } = currentParams;
+      const baseUrl = `https://vidfast.pro/${media_type}/${tmdb_id}/${season}/${episode}/`;
+      const html = await fetch(baseUrl).then(r => r.text());
+      const match = html.match(/\\"en\\":\\"(.*?)\\\"/);
+      if (!match) throw new Error('No encoded text');
+      const encText = match[1];
+      const parts = await callGetAPI('/enc-vidfast', { text: encText, version });
+      const serversEnc = await fetch(parts.servers).then(r => r.text());
+      const servers = await callDecryptAPI('/dec-vidfast', { text: serversEnc, version });
+      if (!servers.length) throw new Error('No servers');
+      const streamEnc = await fetch(`${parts.stream}/${servers[0].data}`).then(r => r.text());
+      const stream = await callDecryptAPI('/dec-vidfast', { text: streamEnc, version });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(stream, null, 2)}</pre>`;
+      streamUrl = stream?.url || stream?.file;
+    }
+    else if (siteId === 'vidsync') {
+      const { title, media_type, year, tmdb_id, season, episode, server } = currentParams;
+      const tokenData = await callGetAPI('/enc-vidsync');
+      const headers = { 'X-Cf-Turnstile': tokenData.token };
+      const encTitle = encodeURIComponent(title);
+      const url = `https://vidsync.xyz/api/stream/fetch?title=${encTitle}&type=${media_type}&releaseYear=${year}&mediaId=${tmdb_id}&serverName=${server}&season=${season}&episode=${episode}`;
+      const encResp = await fetch(url, { headers }).then(r => r.text());
+      const decrypted = await callDecryptAPI('/dec-vidsync', { text: encResp, id: tmdb_id });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.file || decrypted?.url;
+    }
+    else if (siteId === 'xprime') {
+      const { title, year, tmdb_id, imdb_id, season, episode, server } = currentParams;
+      const altcha = await solveXPrimeAltcha();
+      const url = `https://mznxiwqjdiq00239q.space/${server}?name=${encodeURIComponent(title)}&year=${year}&id=${tmdb_id}&imdb=${imdb_id}&season=${season}&episode=${episode}&altcha=${altcha}`;
+      const encrypted = await fetch(url).then(r => r.text());
+      const decrypted = await callDecryptAPI('/dec-xprime', { text: encrypted });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.url || decrypted?.file;
+    }
+    else if (siteId === 'hexa') {
+      const { tmdb_id, media_type, season, episode } = currentParams;
+      const key = Array.from(crypto.getRandomValues(new Uint8Array(32))).map(b => b.toString(16).padStart(2,'0')).join('');
+      const token = await callGetAPI('/enc-hexa').then(d => d.token);
+      const headers = { 'X-Api-Key': key, 'X-Cap-Token': token };
+      let url;
+      if (media_type === 'movie') url = `https://theemoviedb.hexa.su/api/tmdb/movie/${tmdb_id}/images`;
+      else url = `https://theemoviedb.hexa.su/api/tmdb/tv/${tmdb_id}/season/${season}/episode/${episode}/images`;
+      const encrypted = await fetch(url, { headers }).then(r => r.text());
+      const decrypted = await callDecryptAPI('/dec-hexa', { text: encrypted, key });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.stream || decrypted?.url;
+    }
+    else if (siteId === 'lordflix') {
+      const { title, media_type, year, imdb_id, tmdb_id, server, season, episode } = currentParams;
+      const targetUrl = `https://network.hasta-la-vista.site/?title=${encodeURIComponent(title)}&type=${media_type}&year=${year}&imdb=${imdb_id}&tmdb=${tmdb_id}&server=${server}&season=${season}&episode=${episode}`;
+      const data = await callGetAPI('/enc-lordflix', { url: targetUrl });
+      const encrypted = await fetch(data.url).then(r => r.text());
+      const decrypted = await callDecryptAPI('/dec-lordflix', { text: encrypted, sign: data.sign });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.file || decrypted?.url;
+    }
+    else if (siteId === 'yflix') {
+      const { url, season, episode, server_id } = currentParams;
+      const html = await fetch(url).then(r => r.text());
+      const contentMatch = html.match(/data-id="([^"]+)"/);
+      if (!contentMatch) throw new Error('No content ID');
+      const contentId = contentMatch[1];
+      const encId = await callGetAPI('/enc-movies-flix', { text: contentId });
+      const epsResp = await fetch(`https://yflix.to/ajax/episodes/list?id=${contentId}&_=${encId}`).then(r => r.json());
+      const episodes = await callDecryptAPI('/parse-html', { text: epsResp.result });
+      const eid = episodes[season][episode].eid;
+      const encEid = await callGetAPI('/enc-movies-flix', { text: eid });
+      const serversResp = await fetch(`https://yflix.to/ajax/links/list?eid=${eid}&_=${encEid}`).then(r => r.json());
+      const servers = await callDecryptAPI('/parse-html', { text: serversResp.result });
+      const lid = servers[server_id].lid;
+      const encLid = await callGetAPI('/enc-movies-flix', { text: lid });
+      const embedResp = await fetch(`https://yflix.to/ajax/links/view?id=${lid}&_=${encLid}`).then(r => r.json());
+      const embed = await callDecryptAPI('/dec-movies-flix', { text: embedResp.result });
+      decryptResultDiv.innerHTML = `<strong>Embed URL:</strong><br>${embed.url}`;
+      streamUrl = embed.url;
+    }
+    else if (siteId === 'abyss') {
+      const { content_id } = currentParams;
+      const page = await fetch(`https://playhydrax.com/?v=${content_id}`).then(r => r.text());
+      const match = page.match(/const\s+datas\s*=\s*"([^"]*)"/);
+      if (!match) throw new Error('No datas found');
+      const decrypted = await callDecryptAPI('/dec-abyss', { text: match[1] });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.file || decrypted?.url;
+    }
+    else if (siteId === 'reanime') {
+      const { anilist_id, episode } = currentParams;
+      const resp = await fetch(`https://reanime.to/api/flix/${anilist_id}/${episode}`).then(r => r.json());
+      const serverUrl = resp.servers[0].dataLink;
+      const domain = new URL(serverUrl).hostname;
+      const page = await fetch(serverUrl).then(r => r.text());
+      const match = page.match(/type:\s*"data",\s*data:\s*(\{.*?\})\s*,/s);
+      if (!match) throw new Error('No data object');
+      const dataObj = JSON.parse(match[1]);
+      const resolved = await callDecryptAPI('/dec-reanime?type=resolve', { data: dataObj });
+      const tokenResp = await fetch(`https://${domain}/api/m3u8/${resolved.token}`).then(r => r.json());
+      const decrypted = await callDecryptAPI('/dec-reanime?type=decrypt', { data: { state: resolved.state, token_response: tokenResp } });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(decrypted, null, 2)}</pre>`;
+      streamUrl = decrypted?.url;
+    }
+    else if (siteId === 'megaup') {
+      const { view_url } = currentParams;
+      const enc = await fetch(view_url).then(r => r.json()).then(d => d.result);
+      const dec = await callDecryptAPI('/dec-kai', { text: enc });
+      const embed = dec.url;
+      const media = embed.replace('/e/', '/media/');
+      const encrypted = await fetch(media, { headers: { Referer: embed.split('/e/')[0] + '/' } }).then(r => r.json()).then(d => d.result);
+      const streamData = await callDecryptAPI('/dec-mega', { text: encrypted, agent: navigator.userAgent });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(streamData, null, 2)}</pre>`;
+      streamUrl = streamData?.hls || streamData?.url;
+    }
+    else if (siteId === 'rapidshare') {
+      const { view_url } = currentParams;
+      const enc = await fetch(view_url).then(r => r.json()).then(d => d.result);
+      const dec = await callDecryptAPI('/dec-movies-flix', { text: enc });
+      const embed = dec.url;
+      const media = embed.replace('/e/', '/media/');
+      const encrypted = await fetch(media, { headers: { Referer: embed.split('/e/')[0] + '/' } }).then(r => r.json()).then(d => d.result);
+      const streamData = await callDecryptAPI('/dec-rapid', { text: encrypted, agent: navigator.userAgent });
+      decryptResultDiv.innerHTML = `<pre>${JSON.stringify(streamData, null, 2)}</pre>`;
+      streamUrl = streamData?.hls || streamData?.url;
+    }
+    else if (siteId === 'animekai') {
+      const { url, season, episode, sub_type, server_id } = currentParams;
+      const html = await fetch(url).then(r => r.text());
+      const contentMatch = html.match(/data-id="([^"]+)"/);
+      if (!contentMatch) throw new Error('No anime ID');
+      const contentId = contentMatch[1];
+      const encId = await callGetAPI('/enc-kai', { text: contentId });
+      const epsResp = await fetch(`https://animekai.to/ajax/episodes/list?ani_id=${contentId}&_=${encId}`).then(r => r.json());
+      const episodes = await callDecryptAPI('/parse-html', { text: epsResp.result });
+      const token = episodes[season][episode].token;
+      const encToken = await callGetAPI('/enc-kai', { text: token });
+      const serversResp = await fetch(`https://animekai.to/ajax/links/list?token=${token}&_=${encToken}`).then(r => r.json());
+      const servers = await callDecryptAPI('/parse-html', { text: serversResp.result });
+      const lid = servers[sub_type][server_id].lid;
+      const encLid = await callGetAPI('/enc-kai', { text: lid });
+      const embedResp = await fetch(`https://animekai.to/ajax/links/view?id=${lid}&_=${encLid}`).then(r => r.json());
+      const embed = await callDecryptAPI('/dec-kai', { text: embedResp.result });
+      decryptResultDiv.innerHTML = `<strong>Embed URL:</strong><br>${embed.url}`;
+      streamUrl = embed.url;
+    }
+    
+    if (streamUrl) {
+      log(`✅ extracted stream: ${streamUrl.substring(0, 100)}...`, 'ok');
+      loadStreamIntoPlayer(streamUrl);
     } else {
-      const animeList = await searchAnime(query);
-      showSearchResults(animeList, 'anime');
+      throw new Error('No stream URL found in decrypted data');
+    }
+  } catch (err) {
+    log(`❌ ${err.message}`, 'err');
+    decryptResultDiv.innerHTML = `<span style="color:var(--red)">Error: ${err.message}</span>`;
+    toast(`Decrypt failed: ${err.message}`);
+  } finally {
+    loader.classList.add('hidden');
+  }
+}
+
+function loadStreamIntoPlayer(url) {
+  const video = document.getElementById('videoPlayer');
+  if (hlsInstance) { hlsInstance.destroy(); hlsInstance = null; }
+  video.pause(); video.src = '';
+  let finalUrl = useProxy ? buildProxiedUrl(url, { Referer: 'https://enc-dec.app' }) : url;
+  log(`loading stream: ${finalUrl.substring(0, 80)}...`, 'info');
+  if (url.includes('.m3u8') && Hls.isSupported()) {
+    hlsInstance = new Hls({ enableWorker: true });
+    hlsInstance.loadSource(finalUrl);
+    hlsInstance.attachMedia(video);
+    hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => { if (autoPlay) video.play().catch(e => log(e.message, 'warn')); });
+    hlsInstance.on(Hls.Events.ERROR, (_, data) => { if (data.fatal) log(`HLS error: ${data.details}`, 'err'); });
+  } else {
+    video.src = finalUrl;
+    if (autoPlay) video.play().catch(e => log(e.message, 'warn'));
+  }
+}
+
+async function solveXPrimeAltcha() {
+  const challenge = await fetch('https://mznxiwqjdiq00239q.space/altcha/challenge').then(r => r.json());
+  const { algorithm, challenge: ch, salt, maxnumber, signature } = challenge;
+  const threshold = ((1n << 256n) - 1n) / BigInt(maxnumber + 1);
+  const thresholdHex = threshold.toString(16).padStart(64, '0');
+  for (let n = 0; n <= maxnumber * 10; n++) {
+    const h = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${algorithm}:${ch}:${salt}:${n}`));
+    const hashHex = Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2, '0')).join('');
+    if (hashHex <= thresholdHex) {
+      const payload = { algorithm, challenge: ch, maxnumber, number: n, salt, signature, took: 500 };
+      return btoa(JSON.stringify(payload));
     }
   }
-  
-  // BUILD SERVER TABS (dynamic)
-  function buildServerTabs(){
-    const bar = document.getElementById('serversBar');
-    const servers = currentMode === 'tmdb' ? TMDB_SERVERS : ANIME_SERVERS;
-    currentServerId = servers[0].id;
-    bar.innerHTML = `<span class="servers-label"><i class="fas fa-server"></i> source</span>`;
-    servers.forEach(srv=>{
-      const btn = document.createElement('div'); btn.className = 'server-tab'; btn.innerHTML = `<i class="fas ${srv.icon==='🌊'?'fa-water':srv.icon==='⚡'?'fa-bolt':'fa-tv'}"></i> ${srv.label}`;
-      if(srv.id === currentServerId) btn.classList.add('active');
-      btn.onclick = ()=>{
-        document.querySelectorAll('.server-tab').forEach(t=>t.classList.remove('active'));
-        btn.classList.add('active'); currentServerId = srv.id;
-        if(currentMode === 'tmdb' && currentContent) playCurrentStream();
-        else if(currentMode === 'anime' && currentMalId) playCurrentAnimeStream();
-        toast(`server: ${srv.label}`, 'info');
-      };
-      bar.appendChild(btn);
-    });
-  }
-  
-  // Mode switching & proxy badge
-  function setMode(mode){
-    currentMode = mode;
-    document.querySelectorAll('.mode-btn').forEach(btn=>btn.classList.remove('active'));
-    document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
-    buildServerTabs();
-    if(mode === 'tmdb' && currentContent && currentContent.media_type) playCurrentStream();
-    else if(mode === 'anime' && currentMalId) playCurrentAnimeStream();
-    else toast(`Switched to ${mode==='tmdb'?'Movies/TV':'Anime'} mode. Search something!`,'info');
-  }
-  
-  // proxy switcher (toggle between foxy and donka)
-  function cycleProxy(){
-    useProxy = true;
-    if(activeProxy === PROXY_LIST.foxy) activeProxy = PROXY_LIST.donka;
-    else activeProxy = PROXY_LIST.foxy;
-    const label = activeProxy.includes('foxy') ? 'foxy-doxy' : 'donka-bonka';
-    document.getElementById('proxyLabel').innerText = label;
-    toast(`proxy: ${label}`, 'ok');
-    log(`proxy changed → ${activeProxy}`, 'sys');
-  }
-  
-  // toggles
-  document.getElementById('autoPlayToggle').addEventListener('click', ()=>{ autoPlay=!autoPlay; document.getElementById('autoPlayToggle').classList.toggle('active',autoPlay); toast(`Autoplay ${autoPlay?'ON':'OFF'}`); });
-  document.getElementById('autoNextToggle').addEventListener('click', ()=>{ autoNext=!autoNext; document.getElementById('autoNextToggle').classList.toggle('active',autoNext); toast(`AutoNext ${autoNext?'ON':'OFF'}`); });
-  document.getElementById('proxyBadge').addEventListener('click', cycleProxy);
-  document.getElementById('searchBtn').addEventListener('click', handleSearch);
-  document.getElementById('globalSearch').addEventListener('keypress', e=>{if(e.key==='Enter') handleSearch();});
-  
-  // default: set server tabs & initial mode
-  buildServerTabs();
-  setMode('tmdb');
-  autoPlay=true; autoNext=true;
-  document.getElementById('autoPlayToggle').classList.add('active');
-  document.getElementById('autoNextToggle').classList.add('active');
-  log('HYBRID STREAM ENGINE · proxy active, m3u8 ready', 'ok');
+  throw new Error('Altcha solving failed');
+}
+
+// UI builders
+function buildSiteSelector() {
+  const container = document.getElementById('siteSelector');
+  SITES.forEach((site, idx) => {
+    const btn = document.createElement('button');
+    btn.className = `site-btn ${idx === 0 ? 'active' : ''}`;
+    btn.textContent = site.name;
+    btn.onclick = () => {
+      document.querySelectorAll('.site-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSite = site;
+      currentParams = { ...site.defaultParams };
+      buildParamBar();
+      log(`switched to ${site.name}`, 'info');
+    };
+    container.appendChild(btn);
+  });
+}
+
+function buildParamBar() {
+  const container = document.getElementById('paramBar');
+  container.innerHTML = '';
+  const params = currentSite.defaultParams;
+  Object.keys(params).forEach(key => {
+    const field = document.createElement('div');
+    field.className = 'param-field';
+    field.innerHTML = `<label>${key}</label><input type="text" id="param_${key}" value="${currentParams[key] || ''}" placeholder="${key}">`;
+    container.appendChild(field);
+  });
+  // attach input listeners
+  Object.keys(params).forEach(key => {
+    const input = document.getElementById(`param_${key}`);
+    if (input) input.onchange = (e) => { currentParams[key] = e.target.value; };
+  });
+}
+
+function buildServerStrip() {
+  const container = document.getElementById('serverStrip');
+  container.innerHTML = '<span style="font-size:11px;color:var(--muted)"><i class="fas fa-hdd"></i> servers / proxy</span>';
+  const proxyBtn = document.createElement('div');
+  proxyBtn.className = 'server-tab';
+  proxyBtn.innerHTML = `<i class="fas fa-exchange-alt"></i> switch proxy (foxy/donka)`;
+  proxyBtn.onclick = () => {
+    activeProxyUrl = activeProxyUrl === PROXY_LIST.foxy ? PROXY_LIST.donka : PROXY_LIST.foxy;
+    const label = activeProxyUrl.includes('foxy') ? 'foxy-doxy' : 'donka-bonka';
+    document.getElementById('proxyLabel').innerText = `proxy: ${label}`;
+    toast(`proxy switched to ${label}`);
+    log(`proxy → ${activeProxyUrl}`, 'sys');
+  };
+  container.appendChild(proxyBtn);
+}
+
+// Toggles
+document.getElementById('autoplayToggle').onclick = () => { autoPlay = !autoPlay; document.getElementById('autoplayToggle').classList.toggle('active', autoPlay); toast(`Autoplay ${autoPlay ? 'ON' : 'OFF'}`); };
+document.getElementById('proxyToggle').onclick = () => { useProxy = !useProxy; document.getElementById('proxyToggle').classList.toggle('active', useProxy); toast(`Proxy routing ${useProxy ? 'ENABLED' : 'DISABLED'}`); log(`proxy routing: ${useProxy ? 'active' : 'direct'}`, 'sys'); };
+document.getElementById('executeBtn').onclick = executeSite;
+
+// init
+buildSiteSelector();
+buildParamBar();
+buildServerStrip();
+document.getElementById('autoplayToggle').classList.add('active');
+document.getElementById('proxyToggle').classList.add('active');
+log('All 14 sites ready · enc-dec.app API integrated', 'ok');
 </script>
 </body>
 </html>
